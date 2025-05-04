@@ -1,21 +1,32 @@
-require("@nomicfoundation/hardhat-toolbox");
-require("dotenv").config();
+import "@nomicfoundation/hardhat-toolbox";
+import { HardhatUserConfig } from "hardhat/config";
+import * as dotenv from "dotenv";
 
-/** @type import('hardhat/config').HardhatUserConfig */
-module.exports = {
+dotenv.config();
+
+const config: HardhatUserConfig = {
   solidity: "0.8.19",
   networks: {
     hardhat: {},
     base: {
-      url: process.env.BASE_RPC_URL,
-      accounts: [process.env.PRIVATE_KEY],
+      url: process.env.BASE_RPC_URL || "https://mainnet.base.org",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      timeout: 60000, // 60 seconds timeout
     },
     baseGoerli: {
-      url: process.env.BASE_TESTNET_RPC_URL,
-      accounts: [process.env.PRIVATE_KEY],
+      url: "https://base-sepolia-rpc.publicnode.com",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      timeout: 60000, // 60 seconds timeout
+    },
+    baseSepolia: {
+      url: "https://base-sepolia-rpc.publicnode.com",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      timeout: 60000, // 60 seconds timeout
     },
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
-  },
+    apiKey: process.env.ETHERSCAN_API_KEY || "",
+  }
 };
+
+export default config;

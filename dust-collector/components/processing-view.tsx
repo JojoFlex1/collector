@@ -13,10 +13,10 @@ import { TOKEN_PROGRAM_ID, createTransferInstruction, getAssociatedTokenAddress,
 import DustCollectorABI from "@/lib/abi/dustcollector"
 
 // Configuration
-const DUST_COLLECTOR_ADDRESS = "0xYourContractAddressHere" // Replace with your contract address
+const DUST_COLLECTOR_ADDRESS = "0x6C9E083067FB6376d4eA5E3Da05E3ee3965757A3" // Replace with your contract address
 const ENTRY_POINT_ADDRESS = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789" // Base Sepolia EntryPoint
 const PAYMASTER_ENDPOINT = "https://api.developer.coinbase.com/rpc/v1/base-sepolia/S0yM5xPY0VjFfdaJHWCgpwF9AAJdoqja"
-const SOLANA_DESTINATION_ADDRESS = "YourSolanaDestinationAddress" // Replace with your Solana destination wallet
+const SOLANA_DESTINATION_ADDRESS = "8KFUDYJYCTVpQjkuHuYroPmh72UWQrfHUDsyYJ5hgZMS" // Replace with your Solana destination wallet
 const SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com" // Or testnet if you're testing
 const ERC20_ABI = [
   "function balanceOf(address owner) view returns (uint256)",

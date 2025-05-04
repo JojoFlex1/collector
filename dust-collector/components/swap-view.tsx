@@ -10,7 +10,7 @@ import { toast } from "@/components/ui/use-toast"
 import { dustCollectorABI } from "@/lib/abis/dustCollector"
 
 // Contract address for DustCollector - replace with your deployed contract address
-const DUST_COLLECTOR_ADDRESS = "0x4567890123456789012345678901234567890123"
+const DUST_COLLECTOR_ADDRESS = "0x6C9E083067FB6376d4eA5E3Da05E3ee3965757A3"
 
 export default function SwapView() {
   const { address } = useAccount()
