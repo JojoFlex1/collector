@@ -65,7 +65,15 @@ declare global {
 }
 
 export default function WalletItem({ wallet: initialWallet }: WalletItemProps) {
-  const [wallet, setWallet] = useState(initialWallet)
+  const defaultWallet = {
+    id: 0,
+    name: "Unknown Wallet",
+    address: "Connect wallet to view",
+    connected: false,
+    type: "ethereum"
+  };
+
+  const [wallet, setWallet] = useState(initialWallet || defaultWallet);
   const [isConnectingEth, setIsConnectingEth] = useState(false)
   const [isConnectingSol, setIsConnectingSol] = useState(false)
   const [isLoadingBalances, setIsLoadingBalances] = useState(false)
