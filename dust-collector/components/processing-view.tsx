@@ -92,24 +92,30 @@ export default function ProcessingView({ onComplete }: ProcessingViewProps) {
       <div className="mt-8">
         <h3 className="text-xl font-medium mb-3">Processing Details</h3>
         <div className="bg-gray-800 rounded-lg p-5 text-base">
-          <div className="grid grid-cols-2 gap-5">
-            <div>
-              <div className="text-gray-400 mb-2">Estimated Gas Savings</div>
-              <div className="font-medium">~$2.34</div>
+          {isProcessing ? (
+            <div className="grid grid-cols-2 gap-5">
+              <div>
+                <div className="text-gray-400 mb-2">Estimated Gas Savings</div>
+                <div className="font-medium">Calculating...</div>
+              </div>
+              <div>
+                <div className="text-gray-400 mb-2">Processing Fee</div>
+                <div className="font-medium">0.5%</div>
+              </div>
+              <div>
+                <div className="text-gray-400 mb-2">Estimated Completion</div>
+                <div className="font-medium">~2 minutes</div>
+              </div>
+              <div>
+                <div className="text-gray-400 mb-2">Batch Size</div>
+                <div className="font-medium">Calculating...</div>
+              </div>
             </div>
-            <div>
-              <div className="text-gray-400 mb-2">Processing Fee</div>
-              <div className="font-medium">0.5%</div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-gray-400">Processing details will appear here once started</p>
             </div>
-            <div>
-              <div className="text-gray-400 mb-2">Estimated Completion</div>
-              <div className="font-medium">~2 minutes</div>
-            </div>
-            <div>
-              <div className="text-gray-400 mb-2">Batch Size</div>
-              <div className="font-medium">4 transactions</div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
