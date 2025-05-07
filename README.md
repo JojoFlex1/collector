@@ -1,4 +1,4 @@
-# Dust Collector
+#  Collector
 
 > **Turn forgotten dust into real value.**
 
@@ -69,6 +69,19 @@ All contracts and interactions are fully non-custodial and on-chain.
 - 🧪 Staking Feature: In Development
 
 ---
+```bash
+# Clone the repository
+git clone https://github.com/JojoFlex1/collector.git
+
+# Navigate into the project directory
+cd collector
+
+# Install dependencies (depending on your setup)
+npm install      # or yarn install
+
+# Start the local development server
+npm run dev      # or yarn dev
+
 
 ## 📄 License
 
