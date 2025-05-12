@@ -1,6 +1,6 @@
 
 import { ethers } from "ethers";
-import { readContract, writeContract, prepareWriteContract, getAccount } from "@wagmi/core";
+import { readContract, writeContract, getAccount } from "@wagmi/core";
 import { DustCollectorABI } from "@/lib/contracts";
 import { parseUnits } from "viem";
 
@@ -79,7 +79,12 @@ export const depositDustTokens = async (
       throw new Error("Invalid input parameters");
     }
 
-    const config = await prepareWriteContract({
+    const account = getAccount();
+    if (!account.address) {
+      throw new Error("No wallet connected");
+    }
+
+    await writeContract({
       address: CONTRACT_ADDRESS as `0x${string}`,
       abi: DustCollectorABI,
       functionName: 'batchDeposit',
@@ -87,9 +92,9 @@ export const depositDustTokens = async (
         tokenAddresses as `0x${string}`[], 
         amounts.map(amount => parseUnits(amount, 18))
       ],
+      account: account.address
     });
 
-    const { hash } = await writeContract(config);
     return true;
   } catch (error) {
     console.error("Error depositing dust tokens:", error);
@@ -100,14 +105,19 @@ export const depositDustTokens = async (
 // Withdraw as ETH
 export const withdrawAsEth = async (tokenAddresses: string[]): Promise<boolean> => {
   try {
-    const config = await prepareWriteContract({
+    const account = getAccount();
+    if (!account.address) {
+      throw new Error("No wallet connected");
+    }
+
+    await writeContract({
       address: CONTRACT_ADDRESS as `0x${string}`,
       abi: DustCollectorABI,
       functionName: 'withdrawAsEth',
       args: [tokenAddresses as `0x${string}`[]],
+      account: account.address
     });
-
-    const { hash } = await writeContract(config);
+    
     return true;
   } catch (error) {
     console.error("Error withdrawing as ETH:", error);
@@ -118,14 +128,19 @@ export const withdrawAsEth = async (tokenAddresses: string[]): Promise<boolean> 
 // Donate tokens
 export const donateDust = async (tokenAddresses: string[]): Promise<boolean> => {
   try {
-    const config = await prepareWriteContract({
+    const account = getAccount();
+    if (!account.address) {
+      throw new Error("No wallet connected");
+    }
+
+    await writeContract({
       address: CONTRACT_ADDRESS as `0x${string}`,
       abi: DustCollectorABI,
       functionName: 'donateAll',
       args: [tokenAddresses as `0x${string}`[]],
+      account: account.address
     });
-
-    const { hash } = await writeContract(config);
+    
     return true;
   } catch (error) {
     console.error("Error donating dust:", error);
