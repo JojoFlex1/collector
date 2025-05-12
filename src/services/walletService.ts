@@ -1,3 +1,4 @@
+
 import { parseUnits } from "viem";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import { DustCollectorABI } from "@/lib/contracts";
@@ -70,9 +71,26 @@ export const getDustTokens = async (
 // Hooks for contract interactions
 export function useContractActions() {
   const { address } = useAccount();
-  const { writeAsync } = useContractWrite({
+  
+  // Use contract write for deposit operation
+  const { write: depositWrite } = useContractWrite({
     address: CONTRACT_ADDRESS as `0x${string}`,
-    abi: DustCollectorABI
+    abi: DustCollectorABI,
+    functionName: 'batchDeposit'
+  });
+  
+  // Use contract write for withdraw operation
+  const { write: withdrawWrite } = useContractWrite({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: DustCollectorABI,
+    functionName: 'withdrawAsEth'
+  });
+  
+  // Use contract write for donate operation
+  const { write: donateWrite } = useContractWrite({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: DustCollectorABI,
+    functionName: 'donateAll'
   });
 
   // Deposit dust tokens
@@ -89,8 +107,7 @@ export function useContractActions() {
         throw new Error("No wallet connected");
       }
 
-      await writeAsync({
-        functionName: 'batchDeposit',
+      depositWrite({
         args: [
           tokenAddresses as `0x${string}`[], 
           amounts.map(amount => parseUnits(amount, 18))
@@ -111,8 +128,7 @@ export function useContractActions() {
         throw new Error("No wallet connected");
       }
 
-      await writeAsync({
-        functionName: 'withdrawAsEth',
+      withdrawWrite({
         args: [tokenAddresses as `0x${string}`[]]
       });
       
@@ -130,8 +146,7 @@ export function useContractActions() {
         throw new Error("No wallet connected");
       }
 
-      await writeAsync({
-        functionName: 'donateAll',
+      donateWrite({
         args: [tokenAddresses as `0x${string}`[]]
       });
       

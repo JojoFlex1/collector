@@ -13,8 +13,8 @@ export const wagmiConfig = createConfig(
     appName: "Dust Collector",
     // This should be your WalletConnect project ID
     walletConnectProjectId: "YOUR_WALLET_CONNECT_PROJECT_ID",
-    // Pass the chains array to the correct property
-    chains: chains,
+    // For ConnectKit's getDefaultConfig, we need to pass chains correctly
+    chains,
     transports: {
       [mainnet.id]: http(),
       [polygon.id]: http(),
