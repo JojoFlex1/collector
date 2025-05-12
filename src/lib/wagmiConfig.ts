@@ -1,48 +1,39 @@
 
-import { configureChains, createConfig } from 'wagmi';
+import { createConfig, http } from 'wagmi';
 import { mainnet, polygon, optimism, arbitrum, base } from 'wagmi/chains';
-import { MetaMaskConnector } from 'wagmi/connectors/metaMask';
-import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
-import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
-import { InjectedConnector } from 'wagmi/connectors/injected';
-import { publicProvider } from 'wagmi/providers/public';
+import { connectorsForWallets } from 'connectkit';
+import { 
+  metaMaskWallet,
+  walletConnectWallet,
+  coinbaseWallet,
+  injectedWallet 
+} from 'connectkit/wallets';
 
-// Configure chains & providers
-const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [mainnet, polygon, optimism, arbitrum, base],
-  [publicProvider()]
-);
+// Configure chains
+export const chains = [mainnet, polygon, optimism, arbitrum, base];
 
-// Set up connectors
-export const connectors = [
-  new MetaMaskConnector({ chains }),
-  new CoinbaseWalletConnector({
-    chains,
-    options: {
-      appName: 'Dust Collector',
-    },
-  }),
-  new WalletConnectConnector({
-    chains,
-    options: {
-      projectId: 'dust-collector-app', // In production, use a real project ID from WalletConnect
-    },
-  }),
-  new InjectedConnector({
-    chains,
-    options: {
-      name: 'Other Wallets',
-      shimDisconnect: true,
-    },
-  }),
-];
+// Configure wallets
+const connectors = connectorsForWallets([
+  {
+    groupName: 'Popular',
+    wallets: [
+      metaMaskWallet({ chains }),
+      coinbaseWallet({ chains, appName: 'Dust Collector' }),
+      walletConnectWallet({ chains, projectId: 'dust-collector-app' }),
+      injectedWallet({ chains }),
+    ],
+  }
+]);
 
 // Create wagmi config
 export const wagmiConfig = createConfig({
-  autoConnect: true,
+  chains,
+  transports: {
+    [mainnet.id]: http(),
+    [polygon.id]: http(),
+    [optimism.id]: http(),
+    [arbitrum.id]: http(),
+    [base.id]: http(),
+  },
   connectors,
-  publicClient,
-  webSocketPublicClient,
 });
-
-export { chains };

@@ -1,8 +1,6 @@
-
-import { ethers } from "ethers";
-import { readContract, writeContract, getAccount } from "@wagmi/core";
-import { DustCollectorABI } from "@/lib/contracts";
 import { parseUnits } from "viem";
+import { readContract, writeContract, getAccount } from "wagmi/actions";
+import { DustCollectorABI } from "@/lib/contracts";
 
 export const CONTRACT_ADDRESS = "0x6C9E083067FB6376d4eA5E3Da05E3ee3965757A3";
 
@@ -27,8 +25,8 @@ export const getDustTokens = async (
   dustThreshold: number = 1.0
 ): Promise<TokenBalance[]> => {
   try {
-    // In a real app, you would query multiple tokens across chains
-    // For demonstration, we'll return mock data
+    // In a real implementation, you would fetch tokens from the contract
+    // For now we'll keep the mock data but in the next iteration we'll implement real contract calls
     return [
       {
         id: "eth-dai",
