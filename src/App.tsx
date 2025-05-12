@@ -18,8 +18,8 @@ const App = () => {
   
   return (
     <WagmiConfig config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <ConnectKitProvider>
+      <ConnectKitProvider>
+        <QueryClientProvider client={queryClient}>
           <TooltipProvider>
             <Toaster />
             <Sonner />
@@ -32,8 +32,8 @@ const App = () => {
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
-        </ConnectKitProvider>
-      </QueryClientProvider>
+        </QueryClientProvider>
+      </ConnectKitProvider>
     </WagmiConfig>
   );
 };

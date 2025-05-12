@@ -1,77 +1,6 @@
 import { parseUnits } from "viem";
-import { useAccount, useReadContract, useWriteContract } from "wagmi";
-
-// Since we don't have the contracts.ts file, let's create a simple ABI for our example
-export const DustCollectorABI = [
-  {
-    "inputs": [
-      {
-        "internalType": "address[]",
-        "name": "tokenAddresses",
-        "type": "address[]"
-      },
-      {
-        "internalType": "uint256[]",
-        "name": "amounts",
-        "type": "uint256[]"
-      }
-    ],
-    "name": "batchDeposit",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address[]",
-        "name": "tokenAddresses",
-        "type": "address[]"
-      }
-    ],
-    "name": "withdrawAsEth",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address[]",
-        "name": "tokenAddresses",
-        "type": "address[]"
-      }
-    ],
-    "name": "donateAll",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "token",
-        "type": "address"
-      }
-    ],
-    "name": "getUserBalance",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
+import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import { DustCollectorABI } from "@/lib/contracts";
 
 export const CONTRACT_ADDRESS = "0x6C9E083067FB6376d4eA5E3Da05E3ee3965757A3";
 
@@ -141,7 +70,7 @@ export const getDustTokens = async (
 // Hooks for contract interactions
 export function useContractActions() {
   const { address } = useAccount();
-  const { writeContractAsync } = useWriteContract();
+  const { writeContractAsync } = useContractWrite();
 
   // Deposit dust tokens
   const depositDustTokens = async (
@@ -225,17 +154,17 @@ export function useContractActions() {
 
 // Hook for reading contract data
 export function useContractReads() {
-  const { data: userData, isLoading, error } = useReadContract({
+  const { data: userData, isLoading, error } = useContractRead({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: DustCollectorABI,
     functionName: 'getUserBalance',
-    args: ["0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000"]
+    args: ["0x0000000000000000000000000000000000000000" as `0x${string}`, "0x0000000000000000000000000000000000000000" as `0x${string}`]
   });
 
   // Get user balance for a specific token
   const getUserBalance = async (userAddress: string, tokenAddress: string): Promise<string> => {
     try {
-      const result = useReadContract({
+      const result = useContractRead({
         address: CONTRACT_ADDRESS as `0x${string}`,
         abi: DustCollectorABI,
         functionName: 'getUserBalance',
