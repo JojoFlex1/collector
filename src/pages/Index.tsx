@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button"; // Added missing Button import
 import { Hero } from "@/components/Hero";
 import { WalletConnection } from "@/components/WalletConnection";
 import { StepsProgress } from "@/components/StepsProgress";

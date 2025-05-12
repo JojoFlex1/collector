@@ -49,6 +49,9 @@ export const mockDustTokens: DustToken[] = [
   }
 ];
 
+// Export mockDustData which was missing
+export const mockDustData = mockDustTokens;
+
 // Mock processing steps
 export const mockProcessingSteps = [
   {

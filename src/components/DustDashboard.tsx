@@ -8,7 +8,7 @@ import { Check, Info, Search } from "lucide-react";
 import { DustTokenList } from "./DustTokenList";
 import { AggregationFlow } from "./AggregationFlow";
 import { TransactionHistory } from "./TransactionHistory";
-import { mockDustData, mockTransactionHistory } from "@/lib/mock-data";
+import { mockDustTokens, mockTransactionHistory } from "@/lib/mock-data";
 
 interface DustDashboardProps {
   connectedWallet: string;
@@ -18,7 +18,7 @@ interface DustDashboardProps {
 export const DustDashboard = ({ connectedWallet, onDisconnect }: DustDashboardProps) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [scanning, setScanning] = useState(false);
-  const [dustData, setDustData] = useState(mockDustData);
+  const [dustData, setDustData] = useState(mockDustTokens);
   const [transactions, setTransactions] = useState(mockTransactionHistory);
   const [showAggregationFlow, setShowAggregationFlow] = useState(false);
   const [selectedTokens, setSelectedTokens] = useState<string[]>([]);
@@ -58,7 +58,7 @@ export const DustDashboard = ({ connectedWallet, onDisconnect }: DustDashboardPr
       tokensCollected: selectedTokens.length,
       chainsUsed: [...new Set(dustData
         .filter(token => selectedTokens.includes(token.id))
-        .map(token => token.chain))],
+        .map(token => token.chain))] as string[], // Fixed type issue here
       usdcReceived: usdcAmount,
     };
     
@@ -72,6 +72,15 @@ export const DustDashboard = ({ connectedWallet, onDisconnect }: DustDashboardPr
   const formatAddress = (address: string) => {
     if (!address) return "";
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  // Dummy functions for missing props
+  const handleContinue = () => {
+    startAggregation();
+  };
+
+  const handleRefresh = () => {
+    handleScan();
   };
 
   return (
@@ -125,6 +134,8 @@ export const DustDashboard = ({ connectedWallet, onDisconnect }: DustDashboardPr
             tokens={dustData} 
             selectedTokens={selectedTokens}
             onTokenSelect={toggleTokenSelection}
+            onContinue={handleContinue}
+            onRefresh={handleRefresh}
           />
           
           {selectedTokens.length > 0 && (
