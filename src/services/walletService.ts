@@ -72,25 +72,25 @@ export const getDustTokens = async (
 export function useContractActions() {
   const { address } = useAccount();
   
-  // Use contract write for deposit operation
+  // Use contract write for deposit operation with proper typing
   const { write: depositWrite } = useContractWrite({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: DustCollectorABI,
-    functionName: 'batchDeposit'
+    functionName: 'batchDeposit',
   });
   
-  // Use contract write for withdraw operation
+  // Use contract write for withdraw operation with proper typing
   const { write: withdrawWrite } = useContractWrite({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: DustCollectorABI,
-    functionName: 'withdrawAsEth'
+    functionName: 'withdrawAsEth',
   });
   
-  // Use contract write for donate operation
+  // Use contract write for donate operation with proper typing
   const { write: donateWrite } = useContractWrite({
     address: CONTRACT_ADDRESS as `0x${string}`,
     abi: DustCollectorABI,
-    functionName: 'donateAll'
+    functionName: 'donateAll',
   });
 
   // Deposit dust tokens
@@ -107,12 +107,15 @@ export function useContractActions() {
         throw new Error("No wallet connected");
       }
 
-      depositWrite({
-        args: [
-          tokenAddresses as `0x${string}`[], 
-          amounts.map(amount => parseUnits(amount, 18))
-        ]
-      });
+      // Call depositWrite with the correct structure
+      if (depositWrite) {
+        depositWrite({
+          args: [
+            tokenAddresses as `0x${string}`[], 
+            amounts.map(amount => parseUnits(amount, 18))
+          ],
+        });
+      }
 
       return true;
     } catch (error) {
@@ -128,9 +131,12 @@ export function useContractActions() {
         throw new Error("No wallet connected");
       }
 
-      withdrawWrite({
-        args: [tokenAddresses as `0x${string}`[]]
-      });
+      // Call withdrawWrite with the correct structure
+      if (withdrawWrite) {
+        withdrawWrite({
+          args: [tokenAddresses as `0x${string}`[]],
+        });
+      }
       
       return true;
     } catch (error) {
@@ -146,9 +152,12 @@ export function useContractActions() {
         throw new Error("No wallet connected");
       }
 
-      donateWrite({
-        args: [tokenAddresses as `0x${string}`[]]
-      });
+      // Call donateWrite with the correct structure
+      if (donateWrite) {
+        donateWrite({
+          args: [tokenAddresses as `0x${string}`[]],
+        });
+      }
       
       return true;
     } catch (error) {
