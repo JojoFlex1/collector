@@ -1,7 +1,6 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import { useWallet } from "@solana/wallet-adapter-react"
 
 // Define types for the application
 
@@ -19,7 +18,7 @@ export interface ConnectedWallet {
 interface WalletContextType {
   wallets: ConnectedWallet[]
   connectMetaMask: () => Promise<void>
-  connectPhantom: () => void
+  connectPhantom: () => Promise<void>
   disconnectWallet: (id: string) => void
   isConnecting: boolean
   error: string | null
@@ -28,7 +27,7 @@ interface WalletContextType {
 const WalletContext = createContext<WalletContextType>({
   wallets: [],
   connectMetaMask: async () => {},
-  connectPhantom: () => {},
+  connectPhantom: async () => {},
   disconnectWallet: () => {},
   isConnecting: false,
   error: null,
@@ -44,8 +43,6 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
   const [wallets, setWallets] = useState<ConnectedWallet[]>([])
   const [isConnecting, setIsConnecting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const solanaWallet = useWallet()
 
   // Check for existing MetaMask connection on mount
   useEffect(() => {
@@ -77,35 +74,6 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
 
     checkMetaMask()
   }, [])
-
-  // Listen for Solana wallet connection changes (for Phantom)
-  useEffect(() => {
-    if (solanaWallet.connected && solanaWallet.publicKey) {
-      const publicKeyStr = solanaWallet.publicKey.toString()
-
-      setWallets((prev) => {
-        // Check if this wallet is already in the list
-        const exists = prev.some((w) => w.address === publicKeyStr && w.type === "phantom")
-        if (exists) {
-          return prev.map((w) => (w.address === publicKeyStr && w.type === "phantom" ? { ...w, connected: true } : w))
-        } else {
-          return [
-            ...prev,
-            {
-              id: "phantom-" + publicKeyStr,
-              name: "Phantom Wallet",
-              address: publicKeyStr,
-              connected: true,
-              type: "phantom",
-            },
-          ]
-        }
-      })
-    } else {
-      // Mark Phantom wallets as disconnected
-      setWallets((prev) => prev.map((w) => (w.type === "phantom" ? { ...w, connected: false } : w)))
-    }
-  }, [solanaWallet.connected, solanaWallet.publicKey])
 
   // Connect to MetaMask
   const connectMetaMask = async () => {
@@ -142,12 +110,36 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     }
   }
 
-  // Connect to Phantom wallet
-  const connectPhantom = () => {
-    if (solanaWallet.wallet) {
-      solanaWallet.connect()
-    } else {
+  // Connect to Phantom (Solana)
+  const connectPhantom = async () => {
+    if (typeof window === "undefined" || !window.solana) {
       setError("Phantom wallet not installed. Please install Phantom to continue.")
+      return
+    }
+
+    setIsConnecting(true)
+    setError(null)
+
+    try {
+      // Connect to Phantom wallet
+      const resp = await window.solana.connect()
+      const publicKey = resp.publicKey.toString()
+
+      setWallets((prev) => [
+        ...prev.filter((w) => w.type !== "phantom" || w.address !== publicKey),
+        {
+          id: "phantom-" + publicKey,
+          name: "Solana (Phantom)",
+          address: publicKey,
+          connected: true,
+          type: "phantom",
+        },
+      ])
+    } catch (err: any) {
+      console.error("Error connecting to Phantom:", err)
+      setError(err.message || "Failed to connect to Phantom")
+    } finally {
+      setIsConnecting(false)
     }
   }
 
@@ -156,8 +148,8 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     const wallet = wallets.find((w) => w.id === id)
 
     if (wallet) {
-      if (wallet.type === "phantom" && solanaWallet.connected) {
-        solanaWallet.disconnect()
+      if (wallet.type === "phantom" && window.solana) {
+        window.solana.disconnect()
       }
 
       setWallets((prev) => prev.map((w) => (w.id === id ? { ...w, connected: false } : w)))
@@ -252,4 +244,14 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
       {children}
     </WalletContext.Provider>
   )
+}
+
+// Add TypeScript interface for window.solana
+declare global {
+  interface Window {
+    solana?: {
+      connect: () => Promise<{ publicKey: { toString: () => string } }>
+      disconnect: () => Promise<void>
+    }
+  }
 }

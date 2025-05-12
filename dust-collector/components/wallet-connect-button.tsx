@@ -26,9 +26,11 @@ export default function WalletConnectButton() {
     }
   }
 
-  const handlePhantomConnect = () => {
-    connectPhantom()
-    setOpen(false)
+  const handlePhantomConnect = async () => {
+    await connectPhantom()
+    if (!error) {
+      setOpen(false)
+    }
   }
 
   return (
@@ -36,13 +38,13 @@ export default function WalletConnectButton() {
       <DialogTrigger asChild>
         <Button variant="outline" className="flex items-center gap-2 text-sm sm:text-base py-1.5 sm:py-2 px-3 sm:px-4">
           <Wallet className="h-4 w-4 sm:h-5 sm:w-5" />
-          <span className="hidden sm:inline">Connect Wallet</span>
+          <span className="hidden sm:inline">Connect to Base</span>
           <span className="sm:hidden">Connect</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md max-w-[90vw] w-full">
         <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl">Connect Wallet</DialogTitle>
+          <DialogTitle className="text-lg sm:text-xl">Connect to Base</DialogTitle>
           <DialogDescription className="text-sm sm:text-base">
             Connect your wallet to start collecting dust
           </DialogDescription>
