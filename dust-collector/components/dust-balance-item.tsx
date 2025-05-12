@@ -27,25 +27,25 @@ export default function DustBalanceItem({ dust, onToggle }: DustBalanceItemProps
   }
 
   return (
-    <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
-      <div className="flex items-center gap-4">
+    <div className="flex items-center justify-between p-3 sm:p-4 bg-gray-800 rounded-lg">
+      <div className="flex items-center gap-2 sm:gap-4">
         <div
-          className={`w-10 h-10 rounded-full ${getTokenColor(dust.token)} flex items-center justify-center text-sm font-bold`}
+          className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${getTokenColor(dust.token)} flex items-center justify-center text-xs sm:text-sm font-bold`}
         >
           {dust.token.charAt(0)}
         </div>
         <div>
-          <div className="font-medium text-base">
+          <div className="font-medium text-sm sm:text-base">
             {dust.amount} {dust.token}
           </div>
-          <div className="text-sm text-gray-400">{dust.network}</div>
+          <div className="text-xs sm:text-sm text-gray-400">{dust.network}</div>
         </div>
       </div>
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-3 sm:gap-5">
         <div className="text-right">
-          <div className="font-medium text-base">${dust.value.toFixed(2)}</div>
+          <div className="font-medium text-sm sm:text-base">${dust.value.toFixed(2)}</div>
         </div>
-        <Checkbox checked={dust.selected} onCheckedChange={() => onToggle(dust.id)} className="h-5 w-5" />
+        <Checkbox checked={dust.selected} onCheckedChange={() => onToggle(dust.id)} className="h-4 w-4 sm:h-5 sm:w-5" />
       </div>
     </div>
   )

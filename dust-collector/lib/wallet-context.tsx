@@ -6,7 +6,7 @@ import { useWallet } from "@solana/wallet-adapter-react"
 // Define types for the application
 
 // Wallet types
-export type WalletType = "metamask" | "solana"
+export type WalletType = "metamask" | "phantom"
 
 export interface ConnectedWallet {
   id: string
@@ -19,7 +19,7 @@ export interface ConnectedWallet {
 interface WalletContextType {
   wallets: ConnectedWallet[]
   connectMetaMask: () => Promise<void>
-  connectSolana: () => void
+  connectPhantom: () => void
   disconnectWallet: (id: string) => void
   isConnecting: boolean
   error: string | null
@@ -28,7 +28,7 @@ interface WalletContextType {
 const WalletContext = createContext<WalletContextType>({
   wallets: [],
   connectMetaMask: async () => {},
-  connectSolana: () => {},
+  connectPhantom: () => {},
   disconnectWallet: () => {},
   isConnecting: false,
   error: null,
@@ -78,32 +78,32 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     checkMetaMask()
   }, [])
 
-  // Listen for Solana wallet connection changes
+  // Listen for Solana wallet connection changes (for Phantom)
   useEffect(() => {
     if (solanaWallet.connected && solanaWallet.publicKey) {
       const publicKeyStr = solanaWallet.publicKey.toString()
 
       setWallets((prev) => {
         // Check if this wallet is already in the list
-        const exists = prev.some((w) => w.address === publicKeyStr && w.type === "solana")
+        const exists = prev.some((w) => w.address === publicKeyStr && w.type === "phantom")
         if (exists) {
-          return prev.map((w) => (w.address === publicKeyStr && w.type === "solana" ? { ...w, connected: true } : w))
+          return prev.map((w) => (w.address === publicKeyStr && w.type === "phantom" ? { ...w, connected: true } : w))
         } else {
           return [
             ...prev,
             {
-              id: "solana-" + publicKeyStr,
-              name: "Solana Wallet",
+              id: "phantom-" + publicKeyStr,
+              name: "Phantom Wallet",
               address: publicKeyStr,
               connected: true,
-              type: "solana",
+              type: "phantom",
             },
           ]
         }
       })
     } else {
-      // Mark Solana wallets as disconnected
-      setWallets((prev) => prev.map((w) => (w.type === "solana" ? { ...w, connected: false } : w)))
+      // Mark Phantom wallets as disconnected
+      setWallets((prev) => prev.map((w) => (w.type === "phantom" ? { ...w, connected: false } : w)))
     }
   }, [solanaWallet.connected, solanaWallet.publicKey])
 
@@ -142,12 +142,12 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     }
   }
 
-  // Connect to Solana wallet
-  const connectSolana = () => {
+  // Connect to Phantom wallet
+  const connectPhantom = () => {
     if (solanaWallet.wallet) {
       solanaWallet.connect()
     } else {
-      setError("No Solana wallet adapter found. Please install a Solana wallet extension.")
+      setError("Phantom wallet not installed. Please install Phantom to continue.")
     }
   }
 
@@ -156,7 +156,7 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
     const wallet = wallets.find((w) => w.id === id)
 
     if (wallet) {
-      if (wallet.type === "solana" && solanaWallet.connected) {
+      if (wallet.type === "phantom" && solanaWallet.connected) {
         solanaWallet.disconnect()
       }
 
@@ -243,7 +243,7 @@ export const WalletProvider = ({ children }: WalletProviderProps) => {
       value={{
         wallets,
         connectMetaMask,
-        connectSolana,
+        connectPhantom,
         disconnectWallet,
         isConnecting,
         error,
