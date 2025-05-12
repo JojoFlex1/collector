@@ -70,7 +70,10 @@ export const getDustTokens = async (
 // Hooks for contract interactions
 export function useContractActions() {
   const { address } = useAccount();
-  const { writeContractAsync } = useContractWrite();
+  const { writeAsync } = useContractWrite({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: DustCollectorABI
+  });
 
   // Deposit dust tokens
   const depositDustTokens = async (
@@ -86,9 +89,7 @@ export function useContractActions() {
         throw new Error("No wallet connected");
       }
 
-      await writeContractAsync({
-        address: CONTRACT_ADDRESS as `0x${string}`,
-        abi: DustCollectorABI,
+      await writeAsync({
         functionName: 'batchDeposit',
         args: [
           tokenAddresses as `0x${string}`[], 
@@ -110,9 +111,7 @@ export function useContractActions() {
         throw new Error("No wallet connected");
       }
 
-      await writeContractAsync({
-        address: CONTRACT_ADDRESS as `0x${string}`,
-        abi: DustCollectorABI,
+      await writeAsync({
         functionName: 'withdrawAsEth',
         args: [tokenAddresses as `0x${string}`[]]
       });
@@ -131,9 +130,7 @@ export function useContractActions() {
         throw new Error("No wallet connected");
       }
 
-      await writeContractAsync({
-        address: CONTRACT_ADDRESS as `0x${string}`,
-        abi: DustCollectorABI,
+      await writeAsync({
         functionName: 'donateAll',
         args: [tokenAddresses as `0x${string}`[]]
       });
