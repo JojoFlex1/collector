@@ -1,6 +1,77 @@
 import { parseUnits } from "viem";
-import { readContract, writeContract, getAccount } from "wagmi/actions";
-import { DustCollectorABI } from "@/lib/contracts";
+import { useAccount, useReadContract, useWriteContract } from "wagmi";
+
+// Since we don't have the contracts.ts file, let's create a simple ABI for our example
+export const DustCollectorABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "tokenAddresses",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "batchDeposit",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "tokenAddresses",
+        "type": "address[]"
+      }
+    ],
+    "name": "withdrawAsEth",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "tokenAddresses",
+        "type": "address[]"
+      }
+    ],
+    "name": "donateAll",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "getUserBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
 
 export const CONTRACT_ADDRESS = "0x6C9E083067FB6376d4eA5E3Da05E3ee3965757A3";
 
@@ -26,7 +97,7 @@ export const getDustTokens = async (
 ): Promise<TokenBalance[]> => {
   try {
     // In a real implementation, you would fetch tokens from the contract
-    // For now we'll keep the mock data but in the next iteration we'll implement real contract calls
+    // For now we'll keep the mock data until we implement real contract calls
     return [
       {
         id: "eth-dai",
@@ -67,98 +138,120 @@ export const getDustTokens = async (
   }
 };
 
-// Deposit dust tokens
-export const depositDustTokens = async (
-  tokenAddresses: string[],
-  amounts: string[]
-): Promise<boolean> => {
-  try {
-    if (tokenAddresses.length === 0 || tokenAddresses.length !== amounts.length) {
-      throw new Error("Invalid input parameters");
+// Hooks for contract interactions
+export function useContractActions() {
+  const { address } = useAccount();
+  const { writeContractAsync } = useWriteContract();
+
+  // Deposit dust tokens
+  const depositDustTokens = async (
+    tokenAddresses: string[],
+    amounts: string[]
+  ): Promise<boolean> => {
+    try {
+      if (tokenAddresses.length === 0 || tokenAddresses.length !== amounts.length) {
+        throw new Error("Invalid input parameters");
+      }
+
+      if (!address) {
+        throw new Error("No wallet connected");
+      }
+
+      await writeContractAsync({
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        abi: DustCollectorABI,
+        functionName: 'batchDeposit',
+        args: [
+          tokenAddresses as `0x${string}`[], 
+          amounts.map(amount => parseUnits(amount, 18))
+        ]
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Error depositing dust tokens:", error);
+      return false;
     }
+  };
 
-    const account = getAccount();
-    if (!account.address) {
-      throw new Error("No wallet connected");
+  // Withdraw as ETH
+  const withdrawAsEth = async (tokenAddresses: string[]): Promise<boolean> => {
+    try {
+      if (!address) {
+        throw new Error("No wallet connected");
+      }
+
+      await writeContractAsync({
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        abi: DustCollectorABI,
+        functionName: 'withdrawAsEth',
+        args: [tokenAddresses as `0x${string}`[]]
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("Error withdrawing as ETH:", error);
+      return false;
     }
+  };
 
-    await writeContract({
-      address: CONTRACT_ADDRESS as `0x${string}`,
-      abi: DustCollectorABI,
-      functionName: 'batchDeposit',
-      args: [
-        tokenAddresses as `0x${string}`[], 
-        amounts.map(amount => parseUnits(amount, 18))
-      ],
-      account: account.address
-    });
+  // Donate tokens
+  const donateDust = async (tokenAddresses: string[]): Promise<boolean> => {
+    try {
+      if (!address) {
+        throw new Error("No wallet connected");
+      }
 
-    return true;
-  } catch (error) {
-    console.error("Error depositing dust tokens:", error);
-    return false;
-  }
-};
-
-// Withdraw as ETH
-export const withdrawAsEth = async (tokenAddresses: string[]): Promise<boolean> => {
-  try {
-    const account = getAccount();
-    if (!account.address) {
-      throw new Error("No wallet connected");
+      await writeContractAsync({
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        abi: DustCollectorABI,
+        functionName: 'donateAll',
+        args: [tokenAddresses as `0x${string}`[]]
+      });
+      
+      return true;
+    } catch (error) {
+      console.error("Error donating dust:", error);
+      return false;
     }
+  };
 
-    await writeContract({
-      address: CONTRACT_ADDRESS as `0x${string}`,
-      abi: DustCollectorABI,
-      functionName: 'withdrawAsEth',
-      args: [tokenAddresses as `0x${string}`[]],
-      account: account.address
-    });
-    
-    return true;
-  } catch (error) {
-    console.error("Error withdrawing as ETH:", error);
-    return false;
-  }
-};
+  return {
+    depositDustTokens,
+    withdrawAsEth,
+    donateDust
+  };
+}
 
-// Donate tokens
-export const donateDust = async (tokenAddresses: string[]): Promise<boolean> => {
-  try {
-    const account = getAccount();
-    if (!account.address) {
-      throw new Error("No wallet connected");
+// Hook for reading contract data
+export function useContractReads() {
+  const { data: userData, isLoading, error } = useReadContract({
+    address: CONTRACT_ADDRESS as `0x${string}`,
+    abi: DustCollectorABI,
+    functionName: 'getUserBalance',
+    args: ["0x0000000000000000000000000000000000000000", "0x0000000000000000000000000000000000000000"]
+  });
+
+  // Get user balance for a specific token
+  const getUserBalance = async (userAddress: string, tokenAddress: string): Promise<string> => {
+    try {
+      const result = useReadContract({
+        address: CONTRACT_ADDRESS as `0x${string}`,
+        abi: DustCollectorABI,
+        functionName: 'getUserBalance',
+        args: [userAddress as `0x${string}`, tokenAddress as `0x${string}`]
+      });
+      
+      return result.data ? result.data.toString() : "0";
+    } catch (error) {
+      console.error("Error getting user token balance:", error);
+      return "0";
     }
+  };
 
-    await writeContract({
-      address: CONTRACT_ADDRESS as `0x${string}`,
-      abi: DustCollectorABI,
-      functionName: 'donateAll',
-      args: [tokenAddresses as `0x${string}`[]],
-      account: account.address
-    });
-    
-    return true;
-  } catch (error) {
-    console.error("Error donating dust:", error);
-    return false;
-  }
-};
-
-// Get user balance for a specific token
-export const getUserBalance = async (userAddress: string, tokenAddress: string): Promise<string> => {
-  try {
-    const result = await readContract({
-      address: CONTRACT_ADDRESS as `0x${string}`,
-      abi: DustCollectorABI,
-      functionName: 'getUserBalance',
-      args: [userAddress as `0x${string}`, tokenAddress as `0x${string}`],
-    });
-    
-    return result.toString();
-  } catch (error) {
-    console.error("Error getting user token balance:", error);
-    return "0";
-  }
-};
+  return {
+    getUserBalance,
+    isLoading,
+    error
+  };
+}

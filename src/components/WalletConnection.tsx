@@ -1,7 +1,6 @@
 
-import { useState } from "react";
+import { useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
 import { ConnectKitButton } from "connectkit";
@@ -17,12 +16,11 @@ export const WalletConnection = ({ isOpen, onClose, onConnect }: WalletConnectio
   const { toast } = useToast();
 
   // This will be triggered when address changes
-  // Leveraging the ConnectKit UI to handle all wallet connections
-  useState(() => {
+  useEffect(() => {
     if (address) {
       onConnect(address);
     }
-  }, [address]);
+  }, [address, onConnect]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
