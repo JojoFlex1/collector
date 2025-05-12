@@ -8,37 +8,26 @@ interface HeroProps {
 
 export const Hero = ({ onConnectWallet }: HeroProps) => {
   return (
-    <div className="flex flex-col items-center justify-center space-y-8 py-12 text-center animate-fade-in">
+    <div className="space-y-8 py-8">
       <div className="space-y-4">
-        <h1 className="text-4xl md:text-6xl font-bold">
-          <span className="text-gradient-blue">Dust</span>
-          <span className="text-gradient-purple">Collector</span>
-        </h1>
-        <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl">
-          Recover value from your forgotten crypto dust across multiple chains
+        <h1 className="text-4xl font-bold">Cross-Chain Dust Collector</h1>
+        <p className="text-xl text-muted-foreground max-w-3xl">
+          Collect small, unusable balances from different wallets, batch process them to reduce gas fees, and transfer to Base for aggregation.
         </p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-3xl">
-        <div className="glass-card p-6 rounded-lg">
-          <div className="text-web3-blue text-xl font-bold mb-2">Connect</div>
-          <p className="text-sm text-muted-foreground">Link your wallets to discover dust across chains</p>
-        </div>
-        
-        <div className="glass-card p-6 rounded-lg">
-          <div className="text-web3-purple text-xl font-bold mb-2">Collect</div>
-          <p className="text-sm text-muted-foreground">Batch-transfer your dust to a low-fee network</p>
-        </div>
-        
-        <div className="glass-card p-6 rounded-lg">
-          <div className="text-web3-green text-xl font-bold mb-2">Convert</div>
-          <p className="text-sm text-muted-foreground">Transform dust into usable USDC</p>
-        </div>
-      </div>
-      
-      <Button onClick={onConnectWallet} size="lg" className="bg-web3-blue hover:bg-blue-700 text-white">
-        Connect Wallet <ArrowRight className="ml-2 h-4 w-4" />
+      <Button onClick={onConnectWallet} size="lg" className="bg-web3-blue hover:bg-blue-700 text-white px-8 py-6 text-lg">
+        Connect Wallet <ArrowRight className="ml-2 h-5 w-5" />
       </Button>
+      
+      <div className="pt-12">
+        <h2 className="text-2xl font-bold mb-6">About Dust Collection</h2>
+        <p className="text-muted-foreground max-w-3xl">
+          Dust refers to tiny amounts of cryptocurrency that are too small to be transacted due to 
+          network fees exceeding their value. This tool helps you reclaim value from these otherwise 
+          unusable assets by batching them together and moving them to Base's low-fee environment.
+        </p>
+      </div>
     </div>
   );
 };

@@ -1,124 +1,102 @@
 
 import { useState } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { RefreshCw, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
 import { DustToken } from "@/lib/types";
 
 interface DustTokenListProps {
   tokens: DustToken[];
   selectedTokens: string[];
   onTokenSelect: (tokenId: string) => void;
+  onContinue: () => void;
+  onRefresh: () => void;
 }
 
-export const DustTokenList = ({ tokens, selectedTokens, onTokenSelect }: DustTokenListProps) => {
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<string | null>(null);
+export const DustTokenList = ({
+  tokens,
+  selectedTokens,
+  onTokenSelect,
+  onContinue,
+  onRefresh
+}: DustTokenListProps) => {
+  const [activeTab, setActiveTab] = useState("balances");
   
-  // Filter tokens based on search query and chain filter
-  const filteredTokens = tokens.filter(token => {
-    const matchesSearch = token.symbol.toLowerCase().includes(search.toLowerCase()) || 
-                          token.name.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = !filter || token.chain === filter;
-    return matchesSearch && matchesFilter;
-  });
-  
-  // Get unique chains for filter
-  const uniqueChains = Array.from(new Set(tokens.map(token => token.chain)));
+  // Calculate total value of selected tokens
+  const totalSelectedValue = tokens
+    .filter(token => selectedTokens.includes(token.id))
+    .reduce((sum, token) => sum + token.usdValue, 0);
   
   return (
     <div className="space-y-4">
-      {/* Search and filters */}
-      <div className="flex flex-col sm:flex-row justify-between space-y-2 sm:space-y-0 sm:space-x-2">
-        <div className="relative w-full sm:w-64">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search tokens..." 
-            className="pl-9"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+      <div className="flex justify-between items-center">
+        <h3 className="text-xl font-semibold">Dust Balances</h3>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={onRefresh}
+          className="h-9 w-9"
+        >
+          <RefreshCw className="h-5 w-5" />
+        </Button>
+      </div>
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 max-w-[300px] bg-muted">
+          <TabsTrigger value="balances">Balances</TabsTrigger>
+          <TabsTrigger value="charts">Charts</TabsTrigger>
+        </TabsList>
         
-        <div className="flex space-x-2 overflow-x-auto pb-1">
-          <Badge
-            variant={filter === null ? "default" : "outline"}
-            className="cursor-pointer"
-            onClick={() => setFilter(null)}
-          >
-            All Chains
-          </Badge>
-          {uniqueChains.map(chain => (
-            <Badge
-              key={chain}
-              variant={filter === chain ? "default" : "outline"}
-              className="cursor-pointer"
-              onClick={() => setFilter(chain === filter ? null : chain)}
+        <TabsContent value="balances" className="space-y-3 mt-3">
+          {tokens.map(token => (
+            <Card 
+              key={token.id} 
+              className="border border-blue-800/30 bg-card/50 backdrop-blur-sm"
             >
-              {chain}
-            </Badge>
+              <CardContent className="p-4 flex justify-between items-center">
+                <div className="flex items-center">
+                  <div className="w-12 h-12 rounded-full bg-blue-500 text-center flex items-center justify-center text-xl font-semibold mr-4">
+                    {token.symbol.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 className="text-base font-medium">{token.balance} {token.symbol}</h4>
+                    <p className="text-sm text-muted-foreground">{token.chain}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                  <span className="font-mono font-medium">${token.usdValue.toFixed(2)}</span>
+                  <Checkbox
+                    checked={selectedTokens.includes(token.id)}
+                    onCheckedChange={() => onTokenSelect(token.id)}
+                    className="h-5 w-5"
+                  />
+                </div>
+              </CardContent>
+            </Card>
           ))}
-        </div>
-      </div>
-
-      {/* Tokens table */}
-      <div className="rounded-md border glass-card overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12"></TableHead>
-              <TableHead>Token</TableHead>
-              <TableHead>Chain</TableHead>
-              <TableHead className="text-right">Balance</TableHead>
-              <TableHead className="text-right">Value (USD)</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredTokens.length > 0 ? (
-              filteredTokens.map((token) => (
-                <TableRow key={token.id}>
-                  <TableCell>
-                    <Checkbox
-                      checked={selectedTokens.includes(token.id)}
-                      onCheckedChange={() => onTokenSelect(token.id)}
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center mr-2">
-                        {token.symbol.charAt(0)}
-                      </div>
-                      <div>
-                        <div>{token.symbol}</div>
-                        <div className="text-xs text-muted-foreground">{token.name}</div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={`bg-web3-${token.chain.toLowerCase()}/10`}>
-                      {token.chain}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-mono text-sm">
-                    {token.balance} {token.symbol}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    ${token.usdValue.toFixed(2)}
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                  No dust tokens found
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+        </TabsContent>
+        
+        <TabsContent value="charts" className="h-[300px] flex items-center justify-center border rounded-md mt-3">
+          <p className="text-muted-foreground">Chart visualization would be displayed here</p>
+        </TabsContent>
+      </Tabs>
+      
+      {selectedTokens.length > 0 && (
+        <Card className="border border-blue-800/30 bg-card/70 backdrop-blur-sm">
+          <CardContent className="p-4 flex justify-between items-center">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Selected Dust Value</p>
+              <p className="text-2xl font-semibold">${totalSelectedValue.toFixed(2)}</p>
+            </div>
+            <Button onClick={onContinue} className="bg-web3-blue hover:bg-blue-700">
+              Continue to Processing <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

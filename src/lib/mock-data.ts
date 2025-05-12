@@ -1,66 +1,30 @@
 
 import { DustToken, Transaction } from "./types";
 
+// Mock wallet data
+export const mockWallets = [
+  {
+    id: "ethereum",
+    name: "Ethereum Wallet",
+    address: "0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b",
+    shortAddress: "0x1a2...3b4c",
+    icon: "M",
+    connected: false
+  },
+  {
+    id: "solana",
+    name: "Solana Wallet",
+    address: "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789abcdef",
+    shortAddress: "ABCD...EFGH",
+    icon: "S",
+    connected: false
+  }
+];
+
 // Mock dust tokens data
-export const mockDustData: DustToken[] = [
+export const mockDustTokens: DustToken[] = [
   {
-    id: "eth-usdt",
-    symbol: "USDT",
-    name: "Tether USD",
-    chain: "Ethereum",
-    balance: 1.23,
-    usdValue: 1.23
-  },
-  {
-    id: "eth-link",
-    symbol: "LINK",
-    name: "Chainlink",
-    chain: "Ethereum",
-    balance: 0.12,
-    usdValue: 1.85
-  },
-  {
-    id: "polygon-matic",
-    symbol: "MATIC",
-    name: "Polygon",
-    chain: "Polygon",
-    balance: 2.45,
-    usdValue: 0.98
-  },
-  {
-    id: "polygon-aave",
-    symbol: "AAVE",
-    name: "Aave",
-    chain: "Polygon",
-    balance: 0.015,
-    usdValue: 1.12
-  },
-  {
-    id: "arbitrum-arb",
-    symbol: "ARB",
-    name: "Arbitrum",
-    chain: "Arbitrum",
-    balance: 0.53,
-    usdValue: 0.76
-  },
-  {
-    id: "bnb-cake",
-    symbol: "CAKE",
-    name: "PancakeSwap",
-    chain: "BNB",
-    balance: 0.21,
-    usdValue: 0.65
-  },
-  {
-    id: "optimism-op",
-    symbol: "OP",
-    name: "Optimism",
-    chain: "Optimism",
-    balance: 0.31,
-    usdValue: 0.43
-  },
-  {
-    id: "eth-eth",
+    id: "eth-dust",
     symbol: "ETH",
     name: "Ethereum",
     chain: "Ethereum",
@@ -68,29 +32,56 @@ export const mockDustData: DustToken[] = [
     usdValue: 0.42
   },
   {
-    id: "base-dai",
-    symbol: "DAI",
-    name: "Dai Stablecoin",
-    chain: "Base",
-    balance: 0.37,
-    usdValue: 0.37
+    id: "usdt-dust",
+    symbol: "USDT",
+    name: "Tether USD",
+    chain: "Ethereum",
+    balance: 0.54,
+    usdValue: 0.54
+  },
+  {
+    id: "link-dust",
+    symbol: "LINK",
+    name: "Chainlink",
+    chain: "Ethereum",
+    balance: 0.028,
+    usdValue: 0.28
+  }
+];
+
+// Mock processing steps
+export const mockProcessingSteps = [
+  {
+    id: 1,
+    label: "Collecting dust from connected wallets",
+    completed: false,
+    active: false
+  },
+  {
+    id: 2,
+    label: "Optimizing batch transactions",
+    completed: false,
+    active: false
+  },
+  {
+    id: 3,
+    label: "Processing batch transactions",
+    completed: false,
+    active: false
+  },
+  {
+    id: 4,
+    label: "Transferring to Base via bridge",
+    completed: false,
+    active: false
+  },
+  {
+    id: 5,
+    label: "Complete",
+    completed: false,
+    active: false
   }
 ];
 
 // Mock transaction history
-export const mockTransactionHistory: Transaction[] = [
-  {
-    id: "tx-1",
-    date: "2025-05-10T14:32:11Z",
-    tokensCollected: 4,
-    chainsUsed: ["Ethereum", "Polygon"],
-    usdcReceived: 3.64
-  },
-  {
-    id: "tx-2", 
-    date: "2025-05-01T09:15:33Z", 
-    tokensCollected: 2,
-    chainsUsed: ["BNB"],
-    usdcReceived: 1.12
-  }
-];
+export const mockTransactionHistory: Transaction[] = [];
