@@ -4,40 +4,53 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ToastAction } from "@/components/ui/toast";
 import { useToast } from "@/components/ui/use-toast";
-
-const walletOptions = [
-  { id: "metamask", name: "MetaMask", icon: "📱" },
-  { id: "walletconnect", name: "WalletConnect", icon: "🔗" },
-  { id: "coinbase", name: "Coinbase Wallet", icon: "💰" }
-];
+import { useWalletConnection } from "@/hooks/useWalletConnection";
+import { Wallet, Plus, Link } from "lucide-react";
 
 interface WalletConnectionProps {
   isOpen: boolean;
   onClose: () => void;
-  onConnect: (walletType: string) => void;
+  onConnect: (walletAddress: string) => void;
 }
 
 export const WalletConnection = ({ isOpen, onClose, onConnect }: WalletConnectionProps) => {
-  const [connecting, setConnecting] = useState(false);
+  const { isLoading, connectWallet, address, connectors } = useWalletConnection();
   const { toast } = useToast();
 
-  const handleConnect = async (walletId: string) => {
-    setConnecting(true);
-    
-    // Simulate wallet connection (in a real app, this would use actual web3 libraries)
-    setTimeout(() => {
-      setConnecting(false);
-      onConnect(walletId);
+  const handleConnect = async (connectorId: string) => {
+    try {
+      connectWallet(connectorId);
       
+      // The actual connection happens asynchronously through wagmi hooks
+      // We'll rely on the useEffect in the parent component to detect the connection
+    } catch (error) {
+      console.error("Error connecting wallet:", error);
       toast({
-        title: "Wallet Connected",
-        description: `Successfully connected with ${walletId}`,
-        action: <ToastAction altText="OK">OK</ToastAction>,
+        title: "Connection Error",
+        description: "Could not connect wallet. Please try again.",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
-      
-      onClose();
-    }, 1000);
+    }
   };
+
+  // Map connectors to our wallet options format
+  const walletOptions = connectors.map(connector => {
+    let icon = <Plus />;
+    
+    if (connector.id === 'metaMask') {
+      icon = <Wallet />;
+    } else if (connector.id === 'walletConnect') {
+      icon = <Link />;
+    } else if (connector.id === 'coinbaseWallet') {
+      icon = <Wallet />;
+    }
+    
+    return {
+      id: connector.id,
+      name: connector.name,
+      icon
+    };
+  });
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -54,12 +67,12 @@ export const WalletConnection = ({ isOpen, onClose, onConnect }: WalletConnectio
             <Button
               key={wallet.id}
               onClick={() => handleConnect(wallet.id)}
-              disabled={connecting}
+              disabled={isLoading}
               variant="outline"
               size="lg"
               className="flex justify-start items-center space-x-3 h-14 px-4 hover:bg-muted"
             >
-              <span className="text-2xl">{wallet.icon}</span>
+              <div className="text-2xl mr-2">{wallet.icon}</div>
               <span className="font-medium">{wallet.name}</span>
             </Button>
           ))}

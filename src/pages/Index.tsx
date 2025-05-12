@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button"; // Ensure Button is imported
+import { Button } from "@/components/ui/button";
 import { Hero } from "@/components/Hero";
 import { WalletConnection } from "@/components/WalletConnection";
 import { StepsProgress } from "@/components/StepsProgress";
@@ -11,17 +11,21 @@ import { DustSettings } from "@/components/DustSettings";
 import { ProcessingFlow } from "@/components/ProcessingFlow";
 import { AggregateToBase } from "@/components/AggregateToBase";
 import { TransactionHistory } from "@/components/TransactionHistory";
-import { mockWallets, mockDustTokens, mockProcessingSteps } from "@/lib/mock-data";
+import { mockWallets, mockProcessingSteps } from "@/lib/mock-data";
 import { Transaction } from "@/lib/types";
+import { useWalletConnection } from "@/hooks/useWalletConnection";
+import { getDustTokens } from "@/services/walletService";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
-  const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
+  const navigate = useNavigate();
+  const { address, isConnected, chain } = useWalletConnection();
   
   // Collection step states
   const [wallets, setWallets] = useState(mockWallets);
-  const [dustTokens, setDustTokens] = useState(mockDustTokens);
+  const [dustTokens, setDustTokens] = useState<any[]>([]);
   const [selectedTokens, setSelectedTokens] = useState<string[]>([]);
   const [dustThreshold, setDustThreshold] = useState(1.0);
   const [autoRefresh, setAutoRefresh] = useState(false);
@@ -39,22 +43,45 @@ const Index = () => {
   // Transaction history
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   
+  // Effect to check if user is connected with wagmi
+  useEffect(() => {
+    if (isConnected && address) {
+      setCurrentStep(1);
+      loadUserDustTokens();
+    } else {
+      setCurrentStep(0);
+    }
+  }, [isConnected, address]);
+  
   // Handle connect wallet button click
   const handleConnectWallet = () => {
     setIsWalletModalOpen(true);
   };
 
+  // Load user's dust tokens
+  const loadUserDustTokens = async () => {
+    if (!address) return;
+    
+    try {
+      const tokens = await getDustTokens(address, dustThreshold);
+      setDustTokens(tokens);
+    } catch (error) {
+      console.error("Error loading dust tokens:", error);
+      toast.error("Failed to load dust tokens");
+    }
+  };
+
   // Handle wallet connection
-  const handleWalletConnected = (walletType: string) => {
-    setConnectedWallet(`0x71C7656EC7ab88b098defB751B7401B5f6d8976F`);
-    setCurrentStep(1);
+  const handleWalletConnected = (walletAddress: string) => {
+    // Note: with wagmi, the connection is handled by the hooks
+    // This function will be triggered when the modal is closed
+    setIsWalletModalOpen(false);
     
-    // Update the Ethereum wallet to connected
-    setWallets(wallets.map(wallet => 
-      wallet.id === "ethereum" ? { ...wallet, connected: true } : wallet
-    ));
-    
-    toast.success("Wallet connected successfully");
+    // If the user is successfully connected, we'll have an address
+    // and the useEffect above will handle updating the state
+    if (address) {
+      toast.success("Wallet connected successfully");
+    }
   };
 
   // Handle wallet connection from wallet list
@@ -68,11 +95,12 @@ const Index = () => {
   
   // Handle disconnect wallet
   const handleDisconnect = () => {
-    setConnectedWallet(null);
-    setCurrentStep(0);
     setSelectedTokens([]);
-    setWallets(wallets.map(wallet => ({ ...wallet, connected: false })));
     setAggregationComplete(false);
+    
+    // The actual disconnection is handled by the wagmi hook
+    // We just need to update our UI state here
+    setCurrentStep(0);
   };
   
   // Token selection handler
@@ -85,7 +113,8 @@ const Index = () => {
   };
   
   // Refresh dust balances
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
+    await loadUserDustTokens();
     toast.success("Balances refreshed");
   };
   
@@ -155,9 +184,16 @@ const Index = () => {
     }
   }, [currentStep]);
   
+  // Handle going to dashboard
+  const handleGoToDashboard = () => {
+    if (address) {
+      navigate("/dashboard");
+    }
+  };
+  
   // Render content based on current step
   const renderStepContent = () => {
-    if (!connectedWallet) {
+    if (!isConnected) {
       return <Hero onConnectWallet={handleConnectWallet} />;
     }
     
@@ -165,6 +201,17 @@ const Index = () => {
       case 1: // Collect Dust
         return (
           <div className="space-y-8">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold">Connected Wallets</h2>
+              <Button 
+                variant="outline" 
+                onClick={handleGoToDashboard}
+                className="bg-black hover:bg-black/80"
+              >
+                Go to Dashboard
+              </Button>
+            </div>
+            
             <WalletList wallets={wallets} onConnect={handleConnectFromList} />
             
             <DustTokenList
@@ -226,7 +273,7 @@ const Index = () => {
         <div className="container mx-auto px-4 flex justify-between items-center">
           <h1 className="text-xl font-bold">Dust Collector</h1>
           
-          {!connectedWallet ? (
+          {!isConnected ? (
             <Button 
               variant="outline" 
               onClick={handleConnectWallet}
@@ -248,7 +295,7 @@ const Index = () => {
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8">
-        {connectedWallet && currentStep > 0 && (
+        {isConnected && currentStep > 0 && (
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-4">Cross-Chain Dust Collector</h2>
             <p className="text-muted-foreground mb-6">

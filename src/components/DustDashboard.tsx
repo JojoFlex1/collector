@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +8,10 @@ import { Check, Info, Search } from "lucide-react";
 import { DustTokenList } from "./DustTokenList";
 import { AggregationFlow } from "./AggregationFlow";
 import { TransactionHistory } from "./TransactionHistory";
-import { mockDustTokens, mockTransactionHistory } from "@/lib/mock-data";
+import { mockTransactionHistory } from "@/lib/mock-data";
+import { getDustTokens, formatAddress } from "@/services/walletService";
+import { useWalletConnection } from "@/hooks/useWalletConnection";
+import { useToast } from "@/components/ui/use-toast";
 
 interface DustDashboardProps {
   connectedWallet: string;
@@ -17,17 +21,47 @@ interface DustDashboardProps {
 export const DustDashboard = ({ connectedWallet, onDisconnect }: DustDashboardProps) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [scanning, setScanning] = useState(false);
-  const [dustData, setDustData] = useState(mockDustTokens);
+  const [dustData, setDustData] = useState<any[]>([]);
   const [transactions, setTransactions] = useState(mockTransactionHistory);
   const [showAggregationFlow, setShowAggregationFlow] = useState(false);
   const [selectedTokens, setSelectedTokens] = useState<string[]>([]);
+  const { address, disconnect, formattedAddress } = useWalletConnection();
+  const { toast } = useToast();
   
-  // Function to simulate scanning for dust
-  const handleScan = () => {
+  // Load dust tokens when address changes or when scanning
+  useEffect(() => {
+    if (address) {
+      handleScan();
+    }
+  }, [address]);
+
+  // Function to scan for dust
+  const handleScan = async () => {
     setScanning(true);
-    setTimeout(() => {
+    
+    try {
+      // Use the address from wagmi if available, otherwise use the passed prop
+      const userAddress = address || connectedWallet;
+      
+      // Get dust tokens with our default 1.0 USD threshold
+      const tokens = await getDustTokens(userAddress);
+      setDustData(tokens);
+      
+      toast({
+        title: "Scan Complete",
+        description: `Found ${tokens.length} dust tokens across chains`,
+      });
+      
+    } catch (error) {
+      console.error("Error scanning for dust:", error);
+      toast({
+        title: "Scan Failed",
+        description: "Could not scan for dust tokens. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setScanning(false);
-    }, 2000);
+    }
   };
 
   // Total dust value calculation
@@ -57,7 +91,7 @@ export const DustDashboard = ({ connectedWallet, onDisconnect }: DustDashboardPr
       tokensCollected: selectedTokens.length,
       chainsUsed: [...new Set(dustData
         .filter(token => selectedTokens.includes(token.id))
-        .map(token => token.chain))] as string[], // Fixed type issue here
+        .map(token => token.chain))] as string[],
       usdcReceived: usdcAmount,
     };
     
@@ -67,13 +101,13 @@ export const DustDashboard = ({ connectedWallet, onDisconnect }: DustDashboardPr
     setActiveTab("history");
   };
 
-  // Format wallet address for display
-  const formatAddress = (address: string) => {
-    if (!address) return "";
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  // Handle wallet disconnect
+  const handleDisconnect = () => {
+    disconnect();
+    onDisconnect();
   };
 
-  // Dummy functions for missing props
+  // Dummy functions for existing props
   const handleContinue = () => {
     startAggregation();
   };
@@ -90,9 +124,9 @@ export const DustDashboard = ({ connectedWallet, onDisconnect }: DustDashboardPr
           <h2 className="text-2xl font-bold mb-1">Your Dust Dashboard</h2>
           <div className="flex items-center space-x-2">
             <Badge variant="outline" className="px-3 py-1 font-mono">
-              {formatAddress(connectedWallet || "0x1234...5678")}
+              {formattedAddress || formatAddress(connectedWallet)}
             </Badge>
-            <Button variant="ghost" size="sm" onClick={onDisconnect}>
+            <Button variant="ghost" size="sm" onClick={handleDisconnect}>
               Disconnect
             </Button>
           </div>
