@@ -6,12 +6,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { DustToken } from "@/lib/types";
+import { parseUnits } from "ethers";
 
 interface DustTokenListProps {
   tokens: DustToken[];
   selectedTokens: string[];
   onTokenSelect: (tokenId: string) => void;
-  onContinue: () => void;
+  onContinue: (selected: { address: string; amount: string }[]) => void;
   onRefresh: () => void;
 }
 
@@ -67,7 +68,7 @@ export const DustTokenList = ({
                 </div>
                 
                 <div className="flex items-center space-x-4">
-                  <span className="font-mono font-medium">${token.usdValue.toFixed(2)}</span>
+                  <span className="font-mono font-medium">${token.usdValue.toFixed(4)}</span>
                   <Checkbox
                     checked={selectedTokens.includes(token.id)}
                     onCheckedChange={() => onTokenSelect(token.id)}
@@ -89,11 +90,26 @@ export const DustTokenList = ({
           <CardContent className="p-4 flex justify-between items-center">
             <div>
               <p className="text-sm text-muted-foreground">Total Selected Dust Value</p>
-              <p className="text-2xl font-semibold">${totalSelectedValue.toFixed(2)}</p>
+              <p className="text-2xl font-semibold">${totalSelectedValue.toFixed(4)}</p>
             </div>
-            <Button onClick={onContinue} className="bg-web3-blue hover:bg-blue-700">
+            {/* <Button onClick={onContinue} className="bg-web3-blue hover:bg-blue-700">
               Continue to Processing <ArrowRight className="ml-1 h-4 w-4" />
-            </Button>
+            </Button> */}
+             <Button
+          onClick={() => {
+            const selected = tokens
+              .filter((token) => selectedTokens.includes(token.id))
+              .map((token) => ({
+                address: token.address, // token.id is the contract address
+                amount: parseUnits(token.balance.toString(), 18).toString(), // convert to wei (assumes 18 decimals)
+              }));
+
+            onContinue(selected);
+          }}
+          className="bg-web3-blue hover:bg-blue-700"
+        >
+          Continue to Processing <ArrowRight className="ml-1 h-4 w-4" />
+        </Button>
           </CardContent>
         </Card>
       )}

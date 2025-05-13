@@ -4,22 +4,24 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { WagmiConfig } from "wagmi";
+import { createConfig, WagmiProvider } from "wagmi";
 import { wagmiConfig } from "@/lib/wagmiConfig";
 import { useState } from "react";
-import { ConnectKitProvider } from "connectkit";
+import { ConnectKitProvider, getDefaultConfig } from "connectkit";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { DustDashboard } from "./components/DustDashboard";
+import { mainnet } from "viem/chains";
+import React from "react";
 
 const App = () => {
   // Create a client instance inside the component
   const [queryClient] = useState(() => new QueryClient());
-  
+
   return (
-    <WagmiConfig config={wagmiConfig}>
-      <ConnectKitProvider>
+    <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
+           <ConnectKitProvider>
           <TooltipProvider>
             <Toaster />
             <Sonner />
@@ -32,9 +34,9 @@ const App = () => {
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
+          </ConnectKitProvider>
         </QueryClientProvider>
-      </ConnectKitProvider>
-    </WagmiConfig>
+    </WagmiProvider>
   );
 };
 

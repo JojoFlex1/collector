@@ -33,7 +33,7 @@ export const WalletConnection = ({ isOpen, onClose, onConnect }: WalletConnectio
         </DialogHeader>
         
         <div className="grid gap-4 py-4 justify-center">
-          <ConnectKitButton />
+          <ConnectKitButton  />
         </div>
       </DialogContent>
     </Dialog>

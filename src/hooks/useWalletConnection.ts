@@ -1,12 +1,11 @@
 
 import { useCallback, useEffect, useState } from 'react';
-import { useAccount, useDisconnect, useNetwork } from 'wagmi';
+import { useAccount, useDisconnect } from 'wagmi';
 import { formatAddress } from '@/services/walletService';
 
 export function useWalletConnection() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected,chain } = useAccount();
   const { disconnect } = useDisconnect();
-  const { chain } = useNetwork();
   const [formattedAddress, setFormattedAddress] = useState<string>('');
 
   useEffect(() => {

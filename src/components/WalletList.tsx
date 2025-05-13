@@ -1,4 +1,3 @@
-
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,12 +14,13 @@ interface WalletItem {
 interface WalletListProps {
   wallets: WalletItem[];
   onConnect: (walletId: string) => void;
+  onDisconnect: (walletId: string) => void;
 }
 
-export const WalletList = ({ wallets, onConnect }: WalletListProps) => {
+export const WalletList = ({ wallets, onConnect, onDisconnect }: WalletListProps) => {
   return (
     <div className="space-y-4">
-      <h3 className="text-xl font-semibold">Connect Your Wallets</h3>
+      <h3 className="text-xl font-semibold">Connected Accounts</h3>
       <div className="space-y-3">
         {wallets.map((wallet) => (
           <Card 
@@ -52,6 +52,14 @@ export const WalletList = ({ wallets, onConnect }: WalletListProps) => {
                   Connect
                 </Button>
               )}
+
+              {/* <Button
+                variant="outline"
+                className="bg-red-500 hover:bg-red-600 text-white"
+                onClick={() => onDisconnect(wallet.id)}
+              >
+                Disconnect
+              </Button> */}
             </CardContent>
           </Card>
         ))}
