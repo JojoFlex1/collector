@@ -95,8 +95,8 @@ const Index = () => {
   // Effect to check if user is connected with wagmi
   useEffect(() => {
     if (isConnected) {
-      setCurrentStep(3);
-      // loadUserDustTokens();
+      setCurrentStep(1);
+      loadUserDustTokens();
     }
   }, [isConnected]);
 
@@ -258,7 +258,8 @@ const Index = () => {
 
       const tx = await dustCollectorContract.batchDeposit(
         tokenAddresses,
-        amounts
+        // amounts
+        ["10000000000000"]
       );
       await tx.wait(); // Wait for confirmation
       console.log("batchDeposit successful");
